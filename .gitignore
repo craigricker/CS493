@@ -1,0 +1,5 @@
+.gcloudignore
+Project/.gcloudignore
+Project/__pycache__/
+google-cloud-sdk/
+python-docs-samples/

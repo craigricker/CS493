@@ -1,0 +1,661 @@
+{
+	"info": {
+		"_postman_id": "4c0f5b0a-65b1-4e22-831f-a56324f1f90e",
+		"name": "CS493_Assignment2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "(1)PublicGist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c5b9fb8e-7905-44fa-8058-3c7226fba33a",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"pm.test(\"Number of gists is 30\", function() {",
+							"    pm.expect(data.length).to.equal(30);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.github.com/gists/public",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"gists",
+						"public"
+					]
+				},
+				"description": "Test that getting the public gist returns 30 gists."
+			},
+			"response": []
+		},
+		{
+			"name": "(2)Request wolfordj",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "951c633e-d2c8-4cb5-a9e6-84fbe598e43a",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"pm.test(\"Number of public for user wolfordj's gists is > 1\", function() {",
+							"    pm.expect(data.length).to.be.above(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.github.com/users/wolfordj/gists",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"users",
+						"wolfordj",
+						"gists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(3,4)TestCreateGistIncreasesNumberGists",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a91e4014-d1a5-4fb4-a377-b55bbd3a7db0",
+						"exec": [
+							"var new_gist = {",
+							"  \"description\": \"Hello World Examples\",",
+							"  \"public\": true,",
+							"  \"files\": {",
+							"    \"hello_world.rb\": {",
+							"      \"content\": \"class HelloWorld\\n   def initialize(name)\\n      @name = name.capitalize\\n   end\\n   def sayHi\\n      puts \\\"Hello !\\\"\\n   end\\nend\\n\\nhello = HelloWorld.new(\\\"World\\\")\\nhello.sayHi\"",
+							"    },",
+							"    \"hello_world.py\": {",
+							"      \"content\": \"class HelloWorld:\\n\\n    def __init__(self, name):\\n        self.name = name.capitalize()\\n       \\n    def sayHi(self):\\n        print \\\"Hello \\\" + self.name + \\\"!\\\"\\n\\nhello = HelloWorld(\\\"world\\\")\\nhello.sayHi()\"",
+							"    },",
+							"    \"hello_world_ruby.txt\": {",
+							"      \"content\": \"Run `ruby hello_world.rb` to print Hello World\"",
+							"    },",
+							"    \"hello_world_python.txt\": {",
+							"      \"content\": \"Run `python hello_world.py` to print Hello World\"",
+							"    }",
+							"  }",
+							"}",
+							"",
+							"pm.environment.set(\"gist_payload\", JSON.stringify(new_gist));",
+							"",
+							"",
+							"",
+							"pm.sendRequest({",
+							"        url:  \"https://api.github.com/users/craigricker/gists\",",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        pm.environment.set(\"my_gist_n\", res.json().length);",
+							"        console.log(\"Length of \" + res.json().length);",
+							"        console.log(\"Environment var is : \" + pm.environment.get(\"my_gist_n\"));",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e6814b21-85ce-4b95-add2-a60bf9661435",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"pm.environment.set(\"gist_id\", data.id);",
+							"",
+							"var gist = JSON.parse(pm.environment.get(\"gist_payload\"));",
+							"",
+							"pm.test(\"Newly created gist will have identical sizes\", function(){",
+							"    pm.expect(Object.keys(data.files).length).to.equal(Object.keys(gist.files).length);",
+							"});",
+							"",
+							"pm.test(\"Newly created gist has identical description\", function() {",
+							"        pm.expect(data.description).to.equal(gist.description);",
+							"});",
+							"",
+							"pm.test(\"The newly created gist has expected file contents\", function() {",
+							"    console.log(\"testing\");",
+							"    for (var key in gist.files) {",
+							"        console.log(key);",
+							"        pm.expect(data.files[key][\"content\"]).to.equal(gist.files[key][\"content\"]);",
+							"    }",
+							"});",
+							"",
+							"",
+							"pm.sendRequest({",
+							"        url: \"https://api.github.com/gists/\" + pm.environment.get(\"gist_id\"),",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        data = res.json();",
+							"        pm.test(\"Newly created gist will have identical sizes, persisted\", function(){",
+							"            pm.expect(Object.keys(data.files).length).to.equal(Object.keys(gist.files).length);",
+							"        });",
+							"        ",
+							"        pm.test(\"Newly created gist has identical description, persisted\", function() {",
+							"                pm.expect(data.description).to.equal(gist.description);",
+							"        });",
+							"        ",
+							"        pm.test(\"The newly created gist has expected file contents, persisted\", function() {",
+							"            console.log(\"testing\");",
+							"            for (var key in gist.files) {",
+							"                console.log(key);",
+							"                pm.expect(data.files[key][\"content\"]).to.equal(gist.files[key][\"content\"]);",
+							"            }",
+							"        });",
+							"",
+							"    }",
+							"});",
+							"",
+							"",
+							"pm.sendRequest({",
+							"        url: \"https://api.github.com/users/craigricker/gists\",",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        pm.test(\"Number of my gists is +1 then where it started\", function() {",
+							"            pm.expect(res.json().length).to.equal(pm.environment.get(\"my_gist_n\")+1);",
+							"        });",
+							"        pm.environment.set(\"my_gist_n\", res.json().length);",
+							"    }",
+							"});",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{gist_payload}}"
+				},
+				"url": {
+					"raw": "https://api.github.com/gists",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"gists"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(5)TestEditGist",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "a91e4014-d1a5-4fb4-a377-b55bbd3a7db0",
+						"exec": [
+							"var new_gist = {",
+							"  \"description\": \"Hello World Examples\",",
+							"  \"public\": true,",
+							"  \"files\": {",
+							"    \"hello_world.rb\": {",
+							"      \"content\": \"YESSSS\"",
+							"    },",
+							"    \"hello_world.py\": {",
+							"      \"content\": \"NOOO\"",
+							"    },",
+							"    \"hello_world_ruby.txt\": {",
+							"      \"content\": \"MAYBEEE\"",
+							"    },",
+							"    \"hello_world_python.txt\": {",
+							"      \"content\": \"ALWAYSSS\"",
+							"    }",
+							"  }",
+							"}",
+							"pm.environment.set(\"gist_payload\", JSON.stringify(new_gist));",
+							"",
+							"",
+							"",
+							"pm.sendRequest({",
+							"        url:  \"https://api.github.com/users/craigricker/gists\",",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        pm.environment.set(\"my_gist_n\", res.json().length);",
+							"        console.log(\"Length of \" + res.json().length);",
+							"        console.log(\"Environment var is : \" + pm.environment.get(\"my_gist_n\"));",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e6814b21-85ce-4b95-add2-a60bf9661435",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"pm.environment.set(\"gist_id\", data.id);",
+							"",
+							"var gist = JSON.parse(pm.environment.get(\"gist_payload\"));",
+							"",
+							"pm.test(\"Edited gist will have identical sizes\", function(){",
+							"    pm.expect(Object.keys(data.files).length).to.equal(Object.keys(gist.files).length);",
+							"});",
+							"",
+							"pm.test(\"Edited created gist has identical description\", function() {",
+							"        pm.expect(data.description).to.equal(gist.description);",
+							"});",
+							"",
+							"pm.test(\"Edited gist has expected file contents\", function() {",
+							"    console.log(\"testing\");",
+							"    for (var key in gist.files) {",
+							"        pm.expect(data.files[key][\"content\"]).to.equal(gist.files[key][\"content\"]);",
+							"    }",
+							"});",
+							"",
+							"",
+							"pm.sendRequest({",
+							"        url: \"https://api.github.com/gists/\" + pm.environment.get(\"gist_id\"),",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        data = res.json();",
+							"        pm.test(\"Edited gist will have identical sizes, persisted\", function(){",
+							"            pm.expect(Object.keys(data.files).length).to.equal(Object.keys(gist.files).length);",
+							"        });",
+							"        ",
+							"        pm.test(\"Edited gist has identical description, persisted\", function() {",
+							"                pm.expect(data.description).to.equal(gist.description);",
+							"        });",
+							"        ",
+							"        pm.test(\"Edited gist has expected file contents, persisted\", function() {",
+							"            console.log(\"testing\");",
+							"            for (var key in gist.files) {",
+							"                console.log(key);",
+							"                pm.expect(data.files[key][\"content\"]).to.equal(gist.files[key][\"content\"]);",
+							"            }",
+							"        });",
+							"",
+							"    }",
+							"});",
+							"",
+							"",
+							"pm.sendRequest({",
+							"        url: \"https://api.github.com/users/craigricker/gists\",",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        pm.test(\"Number of doesn't increase after edit\", function() {",
+							"            pm.expect(res.json().length).to.equal(pm.environment.get(\"my_gist_n\"));",
+							"        });",
+							"        pm.environment.set(\"my_gist_n\", res.json().length);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{gist_payload}}"
+				},
+				"url": {
+					"raw": "https://api.github.com/gists/{{gist_id}}",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"gists",
+						"{{gist_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(6)TestStarring",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9c9ac27d-620f-49e5-892d-3c52ad1f3b70",
+						"exec": [
+							"pm.sendRequest({",
+							"        url: \"https://api.github.com/gists/\" + pm.environment.get(\"gist_id\") + \"/star\",",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        pm.test(\"Gist starts out as unstarred\", function() {",
+							"            pm.expect(res).to.have.property('code', 404);",
+							"        });",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "5f85139e-f472-41d8-9e49-0f4f1225726c",
+						"exec": [
+							"",
+							"",
+							"",
+							"",
+							"pm.test(\"Gist starred successfully\", function(){",
+							"    pm.response.to.have.status(204);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "https://api.github.com/gists/{{gist_id}}/star",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"gists",
+						"{{gist_id}}",
+						"star"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(7)TestStarredGistInStarredList",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d2286ca4-5f52-42b8-a61c-7d66b664e00e",
+						"exec": [
+							"var data = pm.response.json();",
+							"",
+							"function pluck(array, key) {",
+							"  return array.map(o => o[key]);",
+							"}",
+							"",
+							"pm.test(\"Newly starred gist in returned list of starred gists\", function(){",
+							"    pm.expect(pluck(data, \"id\")).to.contain(pm.environment.get(\"gist_id\"));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.github.com/gists/starred",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"gists",
+						"starred"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(8)TestDestarringGist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d2286ca4-5f52-42b8-a61c-7d66b664e00e",
+						"exec": [
+							"",
+							"",
+							"",
+							"",
+							"function pluck(array, key) {",
+							"  return array.map(o => o[key]);",
+							"}",
+							"",
+							"",
+							"pm.sendRequest({",
+							"        url:  \"https://api.github.com/gists/starred\",",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        pm.test(\"Unstarred gist not in lists of starred gists now\", function(){",
+							"            pm.expect(pluck(res.json(), \"id\")).to.not.contain(pm.environment.get(\"gist_id\"));",
+							"        });",
+							"    }",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://api.github.com/gists/{{gist_id}}/star",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"gists",
+						"{{gist_id}}",
+						"star"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(9)TestDeletingGist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "31c77109-6bf5-4f3b-8589-70f5c58e8568",
+						"exec": [
+							"",
+							"",
+							"pm.test(\"Deleting gist returns 204\", function(){",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							"",
+							"",
+							"pm.sendRequest({",
+							"        url: \"https://api.github.com/gists/\" + pm.environment.get(\"gist_id\"),",
+							"        method: \"GET\",",
+							"        header: 'Authorization: Bearer '+ pm.environment.get(\"token\")",
+							"    }, function(err, res) {",
+							"    if (err) {",
+							"        console.log(err);",
+							"    } else {",
+							"        pm.test(\"Cannot get deleted gist\", function() {",
+							"            pm.expect(res).to.have.property('code', 404);",
+							"        });",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "6d866f31-d9d4-4582-a6d7-b9afa832d84b",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://api.github.com/gists/{{gist_id}}",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"gists",
+						"{{gist_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "4426ef81e9b38c4d7c1c935924e3a9504fddae76",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "5bfe1601-5e2b-4446-8f42-ef879bd49db6",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "9487153b-0d44-4d6b-80b7-8940be4d7579",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
