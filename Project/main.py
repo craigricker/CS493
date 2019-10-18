@@ -180,6 +180,17 @@ def boat_delete(id):
         )
         return response
     client.delete(boat_key)
+
+    # Check if the boat is in a slip
+    query = client.query(kind="slip")
+    query.current_boad = boat.key.id
+    slips = query.fetch()
+    for slip in slips:
+        slip.update({
+            "current_boat": None,
+        })
+        client.put(slip)
+
     response = app.response_class(
         status=204,
         mimetype='application/json'
