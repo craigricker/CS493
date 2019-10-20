@@ -93,7 +93,7 @@ def boat_create():
     client.put(new_boat)
 
     new_boat["id"] = new_boat.key.id
-    new_boat["self"] = "http://localhost:8080/boats/" + str(new_boat.key.id)
+    new_boat["self"] = request.url_root + "boats/"  + str(new_boat.key.id)
 
     response = app.response_class(
         response=json.dumps(new_boat),
@@ -111,7 +111,7 @@ def boat_show(id):
     if boat:
         data = dict(boat)
         data["id"] = boat.key.id
-        data["self"] = "http://localhost:8080/boats/" + str(boat.key.id)
+        data["self"] = request.url_root + "boats/" + str(boat.key.id)
 
         response = app.response_class(
             response=json.dumps(data),
@@ -158,7 +158,7 @@ def boat_edit(id):
     client.put(boat)
 
     boat["id"] = boat.key.id
-    boat["self"] = "http://localhost:8080/boats/" + str(boat.key.id)
+    boat["self"] = request.url_root + "boats/" + str(boat.key.id)
 
     response = app.response_class(
         response=json.dumps(boat),
@@ -204,7 +204,7 @@ def boat_index():
     boats = list(query.fetch())
     for boat in boats:
         boat["id"] = boat.key.id
-        boat["self"] = "http://localhost:8080/boats/" + str(boat.key.id)
+        boat["self"] = request.url_root + "boats/" + str(boat.key.id)
 
     response = app.response_class(
         response=json.dumps(boats),
@@ -235,7 +235,7 @@ def slip_create():
     client.put(new_slip)
 
     new_slip["id"] = new_slip.key.id
-    new_slip["self"] = "http://localhost:8080/slips/" + str(new_slip.key.id)
+    new_slip["self"] = request.url_root + "slips/" + str(new_slip.key.id)
 
     response = app.response_class(
         response=json.dumps(new_slip),
@@ -253,7 +253,7 @@ def slip_show(id):
     if slip:
         data = dict(slip)
         data["id"] = slip.key.id
-        data["self"] = "http://localhost:8080/slips/" + str(slip.key.id)
+        data["self"] = request.url_root + "slips/" + str(slip.key.id)
 
         response = app.response_class(
             response=json.dumps(data),
@@ -276,7 +276,7 @@ def slip_index():
     slips = list(query.fetch())
     for slip in slips:
         slip["id"] = slip.key.id
-        slip["self"] = "http://localhost:8080/slips/" + str(slip.key.id)
+        slip["self"] = request.url_root + "slips/" + str(slip.key.id)
 
     response = app.response_class(
         response=json.dumps(slips),
@@ -347,13 +347,6 @@ def boat_departs(slip_id, boat_id):
     slip = client.get(key=slip_key)
     boat_key = client.key("boat", int(boat_id))
     boat = client.get(key=boat_key)
-    # if not slip or not boat:
-    #     response = app.response_class(
-    #         response=json.dumps({"Error": "The specified boat and/or slip don’t exist"}),
-    #         status=404,
-    #         mimetype='application/json'
-    #     )
-    #     return response
 
     if not slip or not boat or "current_boat" not in slip or slip["current_boat"] != boat.key.id:
         response = app.response_class(
