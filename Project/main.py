@@ -27,7 +27,13 @@ client = datastore.Client()
 
 
 # [START gae_python37_datastore_store_and_fetch_times]
+
 def store_time(dt):
+    """
+    Google provided function, store the time when site is visited
+    :param dt: time when visited
+    :return: none
+    """
     entity = datastore.Entity(key=datastore_client.key('visit'))
     entity.update({
         'timestamp': dt
@@ -37,6 +43,11 @@ def store_time(dt):
 
 
 def fetch_times(limit):
+    """
+    Google provided function, get the previous times this person visited
+    :param limit:
+    :return:
+    """
     query = datastore_client.query(kind='visit')
     query.order = ['-timestamp']
 
@@ -51,6 +62,11 @@ def fetch_times(limit):
 # [START gae_python37_datastore_render_times]
 @app.route('/')
 def root():
+    """
+    Google provided function, root directory
+    Display the last ten times the page was visited
+    :return:
+    """
     # Store the current access time in Datastore.
     store_time(datetime.datetime.now())
 
@@ -64,16 +80,31 @@ def root():
 # [END gae_python37_datastore_render_times]
 
 def validate_boat_create(request):
+    """
+    Ensure the boat has required information
+    :param request:
+    :return:
+    """
     return "name" not in request.json or \
             "length" not in request.json or \
             "type" not in request.json
 
 def validate_slip_create(request):
+    """
+    Ensure a slip has required information to be stored
+    :param request:
+    :return:
+    """
     return "number" not in request.json
 
 
 @app.route('/boats', methods=['POST'])
 def boat_create():
+    """
+    Store a new boat, must havve a name, length and type
+    :return: 400 if not all info provided, 201 if successful
+    """
+    # Ensure boat has all required information, return error otherwise
     if validate_boat_create(request):
         failed = {"Error": "The request object is missing at least one of the required attributes"}
         response = app.response_class(
@@ -105,9 +136,16 @@ def boat_create():
 
 @app.route('/boats/<id>', methods=['GET'])
 def boat_show(id):
+    """
+    Show the boat with the coresponding ID
+    :param id: boat to return info on
+    :return: 200 if successful, 404 otherwise
+    """
+    # Get the boat from datastore
     boat_key = client.key("boat", int(id))
     boat = client.get(key=boat_key)
 
+    # Check the boat exists
     if boat:
         data = dict(boat)
         data["id"] = boat.key.id
@@ -129,6 +167,12 @@ def boat_show(id):
 
 @app.route('/boats/<id>', methods=['PATCh'])
 def boat_edit(id):
+    """
+    Update a given boat
+    :param id: boat to update
+    :return: 400 if into doesnt exist, 404 if boat doesn't exist, 200 if successful
+    """
+    # Return error if not all information present
     if validate_boat_create(request):
         failed = {"Error": "The request object is missing at least one of the required attributes"}
         response = app.response_class(
@@ -140,6 +184,7 @@ def boat_edit(id):
 
     boat_key = client.key("boat", int(id))
     boat = client.get(key=boat_key)
+    # Return error if boat doesn't exist
     if not boat:
         failed = {"Error": "No boat with this boat_id exists"}
         response = app.response_class(
@@ -160,6 +205,7 @@ def boat_edit(id):
     boat["id"] = boat.key.id
     boat["self"] = request.url_root + "boats/" + str(boat.key.id)
 
+    # Return the updated boat
     response = app.response_class(
         response=json.dumps(boat),
         status=200,
@@ -169,6 +215,11 @@ def boat_edit(id):
 
 @app.route('/boats/<id>', methods=['DELETE'])
 def boat_delete(id):
+    """
+    Delete the boat with given id
+    :param id:
+    :return: 404 if boat doesn't exist, 204 on successful deletion
+    """
     boat_key = client.key("boat", int(id))
     boat = client.get(key=boat_key)
     if not boat:
@@ -200,6 +251,10 @@ def boat_delete(id):
 
 @app.route('/boats', methods=['GET'])
 def boat_index():
+    """
+    Return all boats stored
+    :return:
+    """
     query = datastore_client.query(kind="boat")
     boats = list(query.fetch())
     for boat in boats:
@@ -217,6 +272,11 @@ def boat_index():
 
 @app.route('/slips', methods=['POST'])
 def slip_create():
+    """
+    Create a new slip with given information, throw 400 if not all info provided
+    :return:
+    """
+    # Validate input
     if validate_slip_create(request):
         failed = {"Error": "The request object is missing the required number"}
         response = app.response_class(
@@ -228,6 +288,7 @@ def slip_create():
 
     content = request.get_json()
     new_slip = datastore.entity.Entity(key=client.key("slip"))
+    # A new slip defaults to no current boat
     new_slip.update({
         "number": content["number"],
         "current_boat": None,
@@ -247,6 +308,11 @@ def slip_create():
 
 @app.route('/slips/<id>', methods=['GET'])
 def slip_show(id):
+    """
+    Return info associated with provided slip id
+    :param id:
+    :return: 200 if sucessful, 404 if resource doesn't exist
+    """
     slip_key = client.key("slip", int(id))
     slip = client.get(key=slip_key)
 
@@ -272,6 +338,10 @@ def slip_show(id):
 
 @app.route('/slips', methods=['GET'])
 def slip_index():
+    """
+    Return all slips stored in database
+    :return:
+    """
     query = datastore_client.query(kind="slip")
     slips = list(query.fetch())
     for slip in slips:
@@ -288,6 +358,13 @@ def slip_index():
 
 @app.route('/slips/<slip_id>/<boat_id>', methods=["PUT"])
 def boat_arrives(slip_id, boat_id):
+    """
+    the 'boat arrives' means you store the boat id in the given
+    slip.
+    :param slip_id: slip to store boat id
+    :param boat_id: boat that arrives at the slip
+    :return: 404 if slip/boat doesn't exist, 403 if slip full, 204 if successful
+    """
     # Get objects
     slip_key = client.key("slip", int(slip_id))
     slip = client.get(key=slip_key)
@@ -322,6 +399,11 @@ def boat_arrives(slip_id, boat_id):
 
 @app.route('/slips/<slip_id>', methods=["DELETE"])
 def slip_delete(slip_id):
+    """
+    Delete slip with slip_id
+    :param slip_id:
+    :return:
+    """
     slip_key = client.key("slip", int(slip_id))
     slip = client.get(key=slip_key)
     if not slip:
@@ -342,6 +424,11 @@ def slip_delete(slip_id):
 
 @app.route('/slips/<slip_id>/<boat_id>', methods=["DELETE"])
 def boat_departs(slip_id, boat_id):
+    """
+    boat departs slip - remove stored value
+    :param slip_id:
+    :return: 404 if failure, 204 if successful
+    """
     # Get objects
     slip_key = client.key("slip", int(slip_id))
     slip = client.get(key=slip_key)
