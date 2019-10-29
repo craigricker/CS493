@@ -1,0 +1,4 @@
+Flask==1.1.1
+WTForms==2.2.1
+Flask-WTF==0.14.2
+google-cloud-datastore==1.9.0
