@@ -1,0 +1,15 @@
+{% block content %}
+    <h1>Input Basic Information</h1>
+    <form action="/submit" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(size=32) }}
+        </p>
+        <p>
+            {{ form.color.label }}<br>
+            {{ form.color(size=32) }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

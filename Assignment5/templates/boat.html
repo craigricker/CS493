@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+  <title>BoatTitle</title>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <h1>Information about {{ boat["name"] }}</h1>
+    <ul>
+        <li>ID: {{ boat["id"] }}</li>
+        <li><a href="{{ boat["self"] }}">Self Link</a></li>
+        <li>Length: {{ boat["length"] }}</li>
+        <li>Type: {{ boat["type"] }}</li>
+    </ul>
+</body>
+</html>
