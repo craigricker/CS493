@@ -245,9 +245,6 @@ def add_load(b_id, l_id):
     # Add load to the boat
     boat["loads"].append({
         "id": load.key.id,
-        "weight": load["weight"],
-        "content": load["content"],
-        "delivery_date": load["delivery_date"]
     })
     client.put(boat)
     response = Response(
@@ -273,9 +270,6 @@ def remove_load(b_id, l_id):
         return response
 
 
-    print("The load in remove load is")
-    print(load)
-    print(not load["carrier"])
     if not load["carrier"] or load["carrier"]["id"] != int(b_id):
         response = Response(
             response=json.dumps({"Error": "The load it not on that boat"}),
@@ -292,10 +286,7 @@ def remove_load(b_id, l_id):
 
     # Add load to the boat
     boat["loads"].remove({
-        "id": load.key.id,
-        "weight": load["weight"],
-        "content": load["content"],
-        "delivery_date": load["delivery_date"]
+        "id": load.key.id
     })
     client.put(boat)
     response = Response(
