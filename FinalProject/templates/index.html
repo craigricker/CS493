@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <h1>rickercr's OAuth 2.0 Demonstration</h1>
+    <p>The purpose of this web page is to demonstrate OAuth 2.0's abilities</p>
+    <p>To do this, you will log into your Google account at the link below</p>
+    <p>Once this is completed, you will give us the ability to display basic information back to you</p>
+    <p>The link can be found <a
+            href={{ oathUrl }}>here.</a>
+    </p>
+{% endblock %}

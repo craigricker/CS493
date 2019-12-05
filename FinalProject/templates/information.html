@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Information{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <h1>rickercr's OAuth 2.0 Demonstration</h1>
+    <p>Your JWT should be visible below</p>
+    <div>{{  jwt }}</div>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+body {
+  font-family: "helvetica", sans-serif;
+  text-align: center;
+}
+
+.navbar{ background:#F97300;}
+
+.nav-link , .navbar-brand{ color: #f4f4f4; cursor: pointer;}
+
+.nav-link{ margin-right: 1em !important;}
+
+.nav-link:hover{ background: #f4f4f4; color: #f97300; }
+
+.navbar-collapse{ justify-content: flex-end;}
+
+.navbar-toggler{  background:#fff !important;}
+
+.navbar-collapse{
+ justify-content: flex-end;
+}
+
+body {
+  padding-top: 60px;
+}
+@media (max-width: 979px) {
+  body {
+    padding-top: 0px;
+  }
+}
